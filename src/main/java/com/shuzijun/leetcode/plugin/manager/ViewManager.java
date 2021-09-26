@@ -6,16 +6,13 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
-import com.shuzijun.leetcode.plugin.model.Constant;
-import com.shuzijun.leetcode.plugin.model.Question;
-import com.shuzijun.leetcode.plugin.model.Sort;
-import com.shuzijun.leetcode.plugin.model.Tag;
+import com.shuzijun.leetcode.plugin.model.*;
+import com.shuzijun.leetcode.plugin.setting.PersistentConfig;
 import com.shuzijun.leetcode.plugin.utils.LogUtils;
 import com.shuzijun.leetcode.plugin.utils.MessageUtils;
 import com.shuzijun.leetcode.plugin.utils.PropertiesUtils;
 import com.shuzijun.leetcode.plugin.window.WindowFactory;
 import org.apache.commons.lang.StringUtils;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -23,7 +20,6 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author shuzijun
@@ -48,7 +44,12 @@ public class ViewManager {
     private static boolean intersection = Boolean.FALSE;
 
     public static void loadServiceData(JTree tree, Project project) {
-        loadServiceData(tree, project, "");
+        Config config = PersistentConfig.getInstance().getInitConfig();
+        String categorySlug = "";
+        if (config != null && config.getShowOnlyAlgo() == true) {
+            categorySlug = "algorithms";
+        }
+        loadServiceData(tree, project, categorySlug);
     }
 
     public static void loadServiceData(JTree tree, Project project, String categorySlug) {
@@ -69,7 +70,6 @@ public class ViewManager {
                 return question.getFrontendQuestionId();
             }
         });
-
 
         filter.put(Constant.FIND_TYPE_DIFFICULTY, QuestionManager.getDifficulty());
         filter.put(Constant.FIND_TYPE_STATUS, QuestionManager.getStatus());

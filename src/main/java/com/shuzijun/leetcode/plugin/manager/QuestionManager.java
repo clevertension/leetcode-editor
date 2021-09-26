@@ -72,6 +72,7 @@ public class QuestionManager {
 
         }
         questionOfToday();
+        populateQuestionList(questionList, isPremium, categorySlug);
         sortQuestionList(questionList, new Sort(Constant.SORT_TYPE_ID, 1));
         if (questionList != null && !questionList.isEmpty()) {
             String filePath = PersistentConfig.getInstance().getTempFilePath() + Constant.DOC_PATH + ALLNAME;
@@ -79,7 +80,86 @@ public class QuestionManager {
             QUESTIONLIST = questionList;
         }
         return questionList;
+    }
 
+
+    /**
+     * 用question url去获取所有的question, 然后填充
+     * @param questionList
+     */
+    private static void populateQuestionList(List<Question> questionList, Boolean isPremium, String categorySlug) {
+        if (HttpRequestUtils.isLogin()) {
+            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeGraphql(), "application/json");
+            httpRequest.setBody("{\"operationName\":\"allQuestionUrls\",\"variables\":{},\"query\":\"query allQuestionUrls {\\n  allQuestionUrls {\\n    questionUrl\\n    __typename\\n  }\\n}\\n\"}");
+            httpRequest.addHeader("Accept", "application/json");
+            HttpResponse response = HttpRequestUtils.executePost(httpRequest);
+            if (response != null && response.getStatusCode() == 200) {
+                JSONObject questionUrlData = JSONObject.parseObject(response.getBody()).getJSONObject("data").getJSONObject("allQuestionUrls");
+                String url = questionUrlData.getString("questionUrl");
+                httpRequest = HttpRequest.get(url);
+                HttpResponse responseAllQuestion = HttpRequestUtils.executeGet(httpRequest);
+                populateQuestionListWithContent(responseAllQuestion.getBody(), questionList, isPremium, categorySlug);
+            } else {
+                LogUtils.LOG.error("Request QuestionUrl  failed, status:" + response == null ? "" : response.getStatusCode());
+            }
+
+        }
+    }
+
+    private static void populateQuestionListWithContent(String str, List<Question> questionList, Boolean isPremium, String categorySlug) {
+        JSONArray arrays = JSONArray.parseArray(str);
+        int len = arrays.size();
+        for (int i=0; i<len; i++) {
+            JSONObject object = arrays.getJSONObject(i);
+            Question question = new Question();
+            question.setFrontendQuestionId(object.getString("questionId"));
+            JSONArray arr = object.getJSONArray("codeSnippets");
+            if (questionList.contains(question) || isMatchCategorySlug(categorySlug, arr) == false) {
+                continue;
+            }
+            if (URLUtils.isCn() && !PersistentConfig.getInstance().getConfig().getEnglishContent()) {
+                String cnTitle = object.getString("translatedTitle");
+                if (StringUtils.isBlank(cnTitle)) {
+                    question.setTitle(object.getString("title"));
+                } else {
+                    question.setTitle(cnTitle);
+                }
+            }
+            question.setLeaf(Boolean.TRUE);
+            JSONObject stats = JSONObject.parseObject(object.getString("stats"));
+            String acRateStr = stats.getString("acRate");
+            question.setAcceptance(Double.parseDouble(acRateStr.substring(0, acRateStr.length()-1)));
+            try {
+                if (object.getBoolean("isPaidOnly") && !isPremium) {
+                    question.setStatus("lock");
+                } else {
+                    question.setStatus(object.get("status") == null ? "" : object.getString("status").toLowerCase());
+                }
+            } catch (Exception ee) {
+                question.setStatus("");
+            }
+            question.setTitleSlug(object.getString("titleSlug"));
+            question.setLevel(object.getString("difficulty"));
+            questionList.add(question);
+        }
+    }
+
+    private static boolean isMatchCategorySlug(String categorySlu, JSONArray codeSnippets) {
+        if (codeSnippets == null) {
+            return true;
+        }
+        if (categorySlu.equals("algorithms")) {
+            // 只要codeSnipptes里面含有Java, 表示这个就是算法题
+            int len = codeSnippets.size();
+            for (int i=0; i<len; i++) {
+                JSONObject obj = codeSnippets.getJSONObject(i);
+                if (obj.getString("lang").equals("Java")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Map<String, Object> getQuestionPage(String categorySlug, int skip, int limit, Boolean isPremium) throws Exception {

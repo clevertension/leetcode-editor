@@ -10,6 +10,7 @@ import com.shuzijun.leetcode.plugin.model.Constant;
 import com.shuzijun.leetcode.plugin.model.Question;
 import com.shuzijun.leetcode.plugin.model.Sort;
 import com.shuzijun.leetcode.plugin.model.Tag;
+import com.shuzijun.leetcode.plugin.utils.LogUtils;
 import com.shuzijun.leetcode.plugin.utils.MessageUtils;
 import com.shuzijun.leetcode.plugin.utils.PropertiesUtils;
 import com.shuzijun.leetcode.plugin.window.WindowFactory;
@@ -22,6 +23,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author shuzijun
@@ -51,6 +53,7 @@ public class ViewManager {
 
     public static void loadServiceData(JTree tree, Project project, String categorySlug) {
         List<Question> questionList = QuestionManager.getQuestionService(project, categorySlug);
+        LogUtils.LOG.info("Retrieve all question list size = " + questionList.size());
         if (questionList == null || questionList.isEmpty()) {
             MessageUtils.getInstance(project).showWarnMsg("warning", PropertiesUtils.getInfo("response.cache"));
             questionList = QuestionManager.getQuestionCache();
@@ -67,10 +70,11 @@ public class ViewManager {
             }
         });
 
+
         filter.put(Constant.FIND_TYPE_DIFFICULTY, QuestionManager.getDifficulty());
-        //filter.put(Constant.FIND_TYPE_STATUS, QuestionManager.getStatus());
-        // filter.put(Constant.FIND_TYPE_LISTS, QuestionManager.getLists());
-       // filter.put(Constant.FIND_TYPE_TAGS, QuestionManager.getTags());  Temporarily disabled
+        filter.put(Constant.FIND_TYPE_STATUS, QuestionManager.getStatus());
+        filter.put(Constant.FIND_TYPE_LISTS, QuestionManager.getLists());
+        filter.put(Constant.FIND_TYPE_TAGS, QuestionManager.getTags());
         filter.put(Constant.FIND_TYPE_CATEGORY, QuestionManager.getCategory(categorySlug));
 
 

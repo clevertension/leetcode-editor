@@ -2,6 +2,8 @@ package com.shuzijun.leetcode.plugin.model;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Objects;
+
 /**
  * @author shuzijun
  */
@@ -301,7 +303,18 @@ public class Question {
             sb.append("[").append(frontendQuestionId).append("]");
         }
         return sb.append(title).toString();
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Question question = (Question) o;
+        return frontendQuestionId.equals(question.frontendQuestionId);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(frontendQuestionId);
     }
 }

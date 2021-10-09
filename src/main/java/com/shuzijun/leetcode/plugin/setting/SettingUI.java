@@ -61,6 +61,8 @@ public class SettingUI {
     private JCheckBox htmlContentCheckBox;
     private JCheckBox showTopicsCheckBox;
     private JCheckBox showToolIconCheckBox;
+    private JCheckBox showOnlyAlgoCheckBox;
+    private JTextField tempSubFilePath;
 
 
     private Editor fileNameEditor = null;
@@ -169,6 +171,9 @@ public class SettingUI {
             if (StringUtils.isNotBlank(config.getFilePath())) {
                 fileFolderBtn.setText(config.getFilePath());
             }
+            if (StringUtils.isNotBlank(config.getSubFilePath())) {
+                tempSubFilePath.setText(config.getSubFilePath());
+            }
             if (StringUtils.isNotBlank(config.getCodeType())) {
                 codeComboBox.setSelectedItem(config.getCodeType());
             }
@@ -194,6 +199,7 @@ public class SettingUI {
             htmlContentCheckBox.setSelected(config.getHtmlContent());
             showTopicsCheckBox.setSelected(config.getShowTopics());
             showToolIconCheckBox.setSelected(config.getShowToolIcon());
+            showOnlyAlgoCheckBox.setSelected(config.getShowOnlyAlgo());
         } else {
             Color[] colors = new Config().getFormatLevelColour();
             easyLabel.setForeground(colors[0]);
@@ -238,7 +244,11 @@ public class SettingUI {
             config.setId(MTAUtils.getI(""));
         }
         process(config);
-        File file = new File(config.getFilePath() + File.separator + PersistentConfig.PATH + File.separator);
+        String tempSubFilePath = config.getSubFilePath();
+        if (StringUtils.isBlank(tempSubFilePath)) {
+            tempSubFilePath = PersistentConfig.PATH;
+        }
+        File file = new File(config.getFilePath() + File.separator + tempSubFilePath + File.separator);
         if (!file.exists()) {
             file.mkdirs();
         }
@@ -252,6 +262,7 @@ public class SettingUI {
         config.setVersion(Constant.PLUGIN_CONFIG_VERSION_2);
         config.setLoginName(userNameField.getText());
         config.setFilePath(fileFolderBtn.getText());
+        config.setSubFilePath(tempSubFilePath.getText());
         config.setCodeType(codeComboBox.getSelectedItem().toString());
         config.setUrl(webComboBox.getSelectedItem().toString());
         config.setUpdate(updateCheckBox.isSelected());
@@ -266,6 +277,7 @@ public class SettingUI {
         config.setHtmlContent(htmlContentCheckBox.isSelected());
         config.setShowTopics(showTopicsCheckBox.isSelected());
         config.setShowToolIcon(showToolIconCheckBox.isSelected());
+        config.setShowOnlyAlgo(showOnlyAlgoCheckBox.isSelected());
     }
 
 

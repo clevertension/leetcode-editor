@@ -9,6 +9,7 @@ import com.shuzijun.leetcode.plugin.model.Config;
 import com.shuzijun.leetcode.plugin.model.PluginConstant;
 import com.shuzijun.leetcode.plugin.utils.MessageUtils;
 import com.shuzijun.leetcode.plugin.utils.PropertiesUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,6 +66,10 @@ public class PersistentConfig implements PersistentStateComponent<PersistentConf
     }
 
     public String getTempFilePath() {
+        String tempSubFilePath = getConfig().getSubFilePath();
+        if (StringUtils.isNotBlank(tempSubFilePath)) {
+            return getConfig().getFilePath() + File.separator + tempSubFilePath + File.separator;
+        }
         return getConfig().getFilePath() + File.separator + PATH + File.separator + initConfig.get(INITNAME).getAlias() + File.separator;
     }
 

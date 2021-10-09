@@ -36,6 +36,7 @@ public class Config {
      */
     private String filePath;
 
+    private String subFilePath;
     /**
      * 语言
      */
@@ -112,6 +113,11 @@ public class Config {
      * showToolIcon
      */
     private Boolean showToolIcon = true;
+
+    /**
+     * show only algorithm problems
+     */
+    private Boolean showOnlyAlgo = false;
 
     private List<String> favoriteList;
 
@@ -371,6 +377,22 @@ public class Config {
         this.showToolIcon = showToolIcon;
     }
 
+    public Boolean getShowOnlyAlgo() {
+        return showOnlyAlgo;
+    }
+
+    public void setShowOnlyAlgo(Boolean showOnlyAlgo) {
+        this.showOnlyAlgo = showOnlyAlgo;
+    }
+
+    public String getSubFilePath() {
+        return subFilePath;
+    }
+
+    public void setSubFilePath(String subFilePath) {
+        this.subFilePath = subFilePath;
+    }
+
     public boolean isModified(Config config){
         if(config ==null){
             return false;
@@ -378,6 +400,7 @@ public class Config {
         if (!Objects.equals(version, config.version)) return false;
         if (!Objects.equals(loginName, config.loginName)) return false;
         if (!Objects.equals(filePath, config.filePath)) return false;
+        if (!Objects.equals(subFilePath, config.subFilePath)) return false;
         if (!Objects.equals(codeType, config.codeType)) return false;
         if (!Objects.equals(url, config.url)) return false;
         if (!Objects.equals(update, config.update)) return false;
@@ -400,6 +423,8 @@ public class Config {
         if (!Objects.equals(showTopics, config.showTopics))
             return false;
         if (!Objects.equals(showToolIcon, config.showToolIcon))
+            return false;
+        if (!Objects.equals(showOnlyAlgo, config.showOnlyAlgo))
             return false;
         return Objects.equals(levelColour, config.levelColour);
     }
